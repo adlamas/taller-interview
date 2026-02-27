@@ -1,9 +1,17 @@
 class BooksController < ApplicationController
   before_action :set_book, only: %i[ show update destroy ]
 
+  def reserve
+    @book = Book.find(params[:id])
+    @book.reserve!(params[:email])
+    render json: @book
+  rescue StandardError => e
+    render json: { msg: 'book is already reserved' }
+  end
+
   # GET /books
   def index
-    @books = Book.all
+    @books = pagy(Book.find_each(batch_size: 1000))
 
     render json: @books
   end
